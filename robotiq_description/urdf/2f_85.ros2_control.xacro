@@ -10,7 +10,8 @@
         isaac_joint_states:=/isaac_joint_states
         use_fake_hardware:=false
         mock_sensor_commands:=false
-        com_port:=/dev/ttyUSB0">
+        com_port:=/dev/ttyUSB0
+        use_socket_communication:=false">
 
         <ros2_control name="${name}" type="system">
             <!-- Plugins -->
@@ -34,11 +35,25 @@
                     <param name="state_following_offset">0.0</param>
                 </xacro:if>
                 <xacro:unless value="${use_fake_hardware or sim_ignition or sim_isaac}">
-                    <plugin>robotiq_driver/RobotiqGripperHardwareInterface</plugin>
-                    <param name="gripper_closed_position">0.7929</param>
-                    <param name="COM_port">${com_port}</param>
-                    <param name="gripper_speed_multiplier">1.0</param>
-                    <param name="gripper_force_multiplier">0.5</param>
+                    <xacro:if value="${use_socket_communication}">
+                        <plugin>robotiq_driver/RobotiqSocketHardwareInterface</plugin>
+                        <param name="gripper_closed_position">0.7929</param>
+                        <!-- <param name="COM_port">${com_port}</param> -->
+                        <param name="gripper_speed_multiplier">1.0</param>
+                        <param name="gripper_force_multiplier">0.5</param>
+                        <param name="address">192.168.10.2</param>
+                        <param name="port">63352</param>
+                        <param name="connection_timeout">30000</param> <!-- milliseconds -->
+                        <param name="activate_gripper_by_default">1</param> <!-- 0: false, 1: true -->
+                        <param name="auto_calibrate">1</param> <!-- 0: false, 1: true -->
+                    </xacro:if>
+                    <xacro:unless value="${use_socket_communication}">
+                        <plugin>robotiq_driver/RobotiqGripperHardwareInterface</plugin>
+                        <param name="gripper_closed_position">0.7929</param>
+                        <param name="COM_port">${com_port}</param>
+                        <param name="gripper_speed_multiplier">1.0</param>
+                        <param name="gripper_force_multiplier">0.5</param>
+                    </xacro:unless>
                 </xacro:unless>
             </hardware>
 

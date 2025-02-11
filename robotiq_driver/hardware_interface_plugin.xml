@@ -4,4 +4,9 @@
             ROS2 controller for the Robotiq gripper.
         </description>
     </class>
+        <class name="robotiq_driver/RobotiqSocketHardwareInterface" type="robotiq_driver::RobotiqSocketHardwareInterface" base_class_type="hardware_interface::SystemInterface">
+        <description>
+            ROS2 controller for the Robotiq gripper using socket communication.
+        </description>
+    </class>
 </library>

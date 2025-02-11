@@ -1,10 +1,17 @@
-# See https://docs.ros.org/en/humble/How-To-Guides/Ament-CMake-Documentation.html
-
 cmake_minimum_required(VERSION 3.8)
 project(robotiq_driver LANGUAGES CXX)
 
+# set CPP version
+set(CMAKE_CXX_STANDARD 17)
+
 # This module provides installation directories as per the GNU coding standards.
 include(GNUInstallDirs)
+
+# Export compile commands for use with clang-tidy.
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+# Set the compiler flags.
+set(CMAKE_BUILD_TYPE Debug)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -16,6 +23,7 @@ find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)
 find_package(serial REQUIRED)
+find_package(Boost REQUIRED COMPONENTS system)
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   ament_cmake
@@ -45,6 +53,8 @@ add_library(
   include/robotiq_driver/serial.hpp
   include/robotiq_driver/serial_factory.hpp
   include/robotiq_driver/visibility_control.hpp
+  include/robotiq_driver/robotiq_socket.hpp
+  include/robotiq_driver/robotiq_socket_hardware_interface.hpp
   src/crc_utils.cpp
   src/data_utils.cpp
   src/hardware_interface.cpp
@@ -53,8 +63,10 @@ add_library(
   src/fake/fake_driver.cpp
   src/default_serial.cpp
   src/default_serial_factory.cpp
+  src/robotiq_socket.cpp
+  src/robotiq_socket_hardware_interface.cpp
 )
-target_link_libraries(robotiq_driver atomic)
+target_link_libraries(robotiq_driver PUBLIC atomic Boost::system)
 target_include_directories(
   robotiq_driver
   PUBLIC
@@ -62,7 +74,7 @@ target_include_directories(
   $<INSTALL_INTERFACE:include>
 )
 ament_target_dependencies(
-  robotiq_driver
+  robotiq_driver PUBLIC
   ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )
 

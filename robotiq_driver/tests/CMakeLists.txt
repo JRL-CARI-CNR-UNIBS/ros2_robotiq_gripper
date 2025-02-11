@@ -70,3 +70,14 @@ target_include_directories(test_data_utils
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
 )
 target_link_libraries(test_data_utils robotiq_driver)
+
+###############################################################################
+# test_robotiq_socket
+
+add_executable(test_robotiq_socket
+    test_robotiq_socket.cpp
+)
+target_include_directories(test_robotiq_socket
+  PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
+)
+target_link_libraries(test_robotiq_socket robotiq_driver)

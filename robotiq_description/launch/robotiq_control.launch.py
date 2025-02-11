@@ -69,6 +69,20 @@ def generate_launch_description():
             name="launch_rviz", default_value="false", description="Launch RViz?"
         )
     )
+    args.append(
+        launch.actions.DeclareLaunchArgument(
+            name="use_fake_hardware",
+            default_value="false",
+            description="Use fake hardware?",
+        )
+    )
+    args.append(
+        launch.actions.DeclareLaunchArgument(
+            name="use_socket_communication",
+            default_value="false",
+            description="Use socket communication?",
+        )
+    )
 
     robot_description_content = Command(
         [
@@ -76,7 +90,9 @@ def generate_launch_description():
             " ",
             LaunchConfiguration("model"),
             " ",
-            "use_fake_hardware:=false",
+            "use_fake_hardware:=", LaunchConfiguration("use_fake_hardware"),
+            " ",
+            "use_socket_communication:=", LaunchConfiguration("use_socket_communication"),
         ]
     )
     robot_description_param = {
@@ -106,6 +122,7 @@ def generate_launch_description():
             update_rate_config_file,
             initial_joint_controllers,
         ],
+        prefix=["gdb -ex run --args"],
     )
 
     robot_state_publisher_node = launch_ros.actions.Node(
@@ -149,7 +166,7 @@ def generate_launch_description():
         control_node,
         robot_state_publisher_node,
         joint_state_broadcaster_spawner,
-        robotiq_gripper_controller_spawner,
+        #robotiq_gripper_controller_spawner,
         robotiq_activation_controller_spawner,
         rviz_node,
     ]
