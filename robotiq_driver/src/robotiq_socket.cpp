@@ -3,14 +3,13 @@
 #include <stdexcept>
 #include <chrono>
 #include <thread>
-#include <fmt/core.h>
 
 using boost::asio::ip::tcp;
 
 namespace robotiq_driver
 {
 RobotiqSocket::RobotiqSocket(const std::string& address, const int port) 
-    : address_(address), active_(false), port_(port), socket_status_(SocketStatus::DISCONNECTED) {}
+    : address_(address), active_(false), port_(port), socket_status_(SocketStatus::DISCONNECTED), open_position_(MIN_POSITION), closed_position_(MAX_POSITION) {}
 
 RobotiqSocket::~RobotiqSocket() {
     disconnect();
