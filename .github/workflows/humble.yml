@@ -3,13 +3,13 @@ name: Humble
 on:
   workflow_dispatch:
     branches:
-      - main
+      - humble
   pull_request:
     branches:
-      - main
+      - humble
   push:
     branches:
-      - main
+      - humble
 
 jobs:
   build-and-test:
@@ -19,6 +19,8 @@ jobs:
         os: [ubuntu-22.04]
       fail-fast: false
     steps:
+      - uses: actions/checkout@v2
+
       - name: Setup ROS 2
         uses: ros-tooling/setup-ros@0.7.1
         with:
@@ -28,3 +30,4 @@ jobs:
         with:
           package-name: robotiq_controllers robotiq_description robotiq_controllers robotiq_driver robotiq_hardware_tests
           target-ros2-distro: humble
+          

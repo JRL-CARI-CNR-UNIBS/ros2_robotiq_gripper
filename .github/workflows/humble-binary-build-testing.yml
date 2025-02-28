@@ -5,16 +5,16 @@ name: Humble Binary Build - testing
 on:
   workflow_dispatch:
     branches:
-      - humble
+      - main
   pull_request:
     branches:
-      - humble
+      - main
   push:
     branches:
-      - humble
-  # schedule:
-  #   # Run every morning to detect flakiness and broken dependencies
-  #   - cron: '03 1 * * *'
+      - main
+  schedule:
+    # Run every morning to detect flakiness and broken dependencies
+    - cron: '03 1 * * *'
 
 jobs:
   binary:
