@@ -30,4 +30,4 @@ jobs:
         with:
           package-name: robotiq_controllers robotiq_description robotiq_controllers robotiq_driver robotiq_hardware_tests
           target-ros2-distro: humble
-          
+          vcs-repo-file-url: ros2_robotiq_gripper.humble.repos
