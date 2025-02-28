@@ -66,7 +66,8 @@ add_library(
   src/robotiq_socket.cpp
   src/robotiq_socket_hardware_interface.cpp
 )
-target_link_libraries(robotiq_driver PUBLIC atomic Boost::system)
+target_link_libraries(robotiq_driver PRIVATE atomic Boost::system)
+
 target_include_directories(
   robotiq_driver
   PUBLIC
