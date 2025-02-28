@@ -7,6 +7,8 @@ controller_manager:
       type: position_controllers/GripperActionController
     robotiq_activation_controller:
       type: robotiq_controllers/RobotiqActivationController
+    robotiq_forward_command_controller:
+      type: forward_command_controller/MultiInterfaceForwardCommandController
 
 robotiq_gripper_controller:
   ros__parameters:
@@ -17,4 +19,9 @@ robotiq_gripper_controller:
 
 robotiq_activation_controller:
   ros__parameters:
-    default: true
+    default: false
+
+robotiq_forward_command_controller:
+  ros__parameters:
+    joint: robotiq_85_left_knuckle_joint
+    interface_names: ['position', 'velocity', 'effort']

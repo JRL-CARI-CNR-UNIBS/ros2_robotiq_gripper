@@ -111,41 +111,57 @@ public:
   hardware_interface::return_type write(const rclcpp::Time& time, const rclcpp::Duration& period) override;
 
 protected:
-  // Robotiq .
-  static constexpr double DEFAULT_TIMEOUT = 30.0 * 1000;
-  static constexpr double NO_NEW_CMD_ = std::numeric_limits<double>::quiet_NaN();
-  static constexpr double GRIPPER_MAX_SPEED = 0.150;  // mm/s
-  static constexpr double GRIPPER_MAX_FORCE = 235;    // N
-  static constexpr auto GRIPPER_COMMS_LOOP_PERIOD = std::chrono::milliseconds{10};
+  // Constants
+  static constexpr double DEFAULT_TIMEOUT = 30.0 * 1000;                           // Connection timeout [ms]
+  static constexpr double NO_NEW_CMD_ = std::numeric_limits<double>::quiet_NaN();  // Uninitialized command
+  static constexpr auto GRIPPER_COMMS_LOOP_PERIOD = std::chrono::milliseconds{100}; // Communication loop period [ms]
+  static constexpr int NUM_STATE_INTERFACES = 2;
+  static constexpr int NUM_COMMAND_INTERFACES = 3;
+  static constexpr double GRIPPER_MAX_POSITION = 0.085;                            // [m]
+  static constexpr double GRIPPER_MAX_SPEED = 0.150;                               // [m/s]
+  static constexpr double GRIPPER_MAX_FORCE = 235;                                 // [N]
   
+  // Parameters (read from ros2 control XACRO)
+  double gripper_closed_pos_rad_ = 0.0; // unused when using GRIPPER_MAX_POSITION
+  bool activate_gripper_by_default_ = false;
+
+  // Logger
   const rclcpp::Logger LOGGER = rclcpp::get_logger("RobotiqSocketHardwareInterface");
 
+  // Robotiq Socket gripper
   std::unique_ptr<robotiq_driver::RobotiqSocket> gripper_;
+
+  // State interfaces (use radians for compatibility with robot state publisher)
+  double gripper_position_ = 0.0;   // [rad]
+  double gripper_velocity_ = 0.0;   // [rad/s]
+  // double gripper_effort_   = 0.0;   // [N] DOES NOT MAKE SENSE: NO FORCE SENSOR INSTALLED
+
+  // Command interfaces (use meters for convenience when issuing commands)
+  double gripper_position_command_ = 0.0; // [m]
+  double gripper_velocity_command_ = 0.0; // [m/s]
+  double gripper_effort_command_   = 0.0; // [N]
+
+  // Command interfaces to reactivate the gripper
+  double reactivate_gripper_command_= 0.0;
+  double reactivate_gripper_response_ = 0.0;
+
+  // Atomic variables read/set by the read/write methods and the communication thread
+  std::atomic<uint8_t> write_command_;
+  std::atomic<uint8_t> write_command_previous_;  
+  std::atomic<uint8_t> write_force_;
+  std::atomic<uint8_t> write_speed_;
+  std::atomic<uint8_t> gripper_current_position_int_;
+  std::atomic<uint8_t> gripper_current_velocity_int_;
+  // std::atomic<uint8_t> gripper_current_effort_int_; DOES NOT MAKE SENSE: NO FORCE SENSOR INSTALLED
+
+  // Atomic variables read by the read method and read/set by the communication thread
+  std::atomic<bool> reactivate_gripper_async_cmd_;
+  std::atomic<std::optional<bool>> reactivate_gripper_async_response_;
 
   // We use a thread to read/write to the driver so that we dont block the hardware_interface read/write.
   std::thread communication_thread_;
   std::atomic<bool> communication_thread_is_running_;
   void communication_task();
-
-  double gripper_position_ = 0.0;   // in radians
-  double gripper_velocity_ = 0.0;   // in radians per second
-
-  double gripper_position_command_ = 0.0;
-  double gripper_velocity_command_ = 0.0;
-  double gripper_force_command_ = 0.0;
-
-  double reactivate_gripper_command_= 0.0;
-  double reactivate_gripper_response_ = 0.0;
-
-  double gripper_closed_pos_rad_ = 0.0;
-
-  bool activate_gripper_by_default_ = false;
-  bool auto_calibrate_ = true;
-
-  std::atomic<uint8_t> write_command_;
-  std::atomic<uint8_t> write_force_;
-  std::atomic<uint8_t> write_speed_;
-  std::atomic<uint8_t> gripper_current_state_;
 };
 
 }  // namespace robotiq_driver

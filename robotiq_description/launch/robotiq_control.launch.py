@@ -78,9 +78,44 @@ def generate_launch_description():
     )
     args.append(
         launch.actions.DeclareLaunchArgument(
+            name="controller_spawner_timeout",
+            default_value="30",
+            description="Controller spawner timeout in seconds",
+        )
+    )
+    args.append(
+        launch.actions.DeclareLaunchArgument(
             name="use_socket_communication",
             default_value="false",
             description="Use socket communication?",
+        )
+    )
+    args.append(
+        launch.actions.DeclareLaunchArgument(
+            name="ip_address",
+            default_value="192.168.10.2",
+            description="Ip address for socket communication",
+        )
+    )
+    args.append(
+        launch.actions.DeclareLaunchArgument(
+            name="port",
+            default_value="63352",
+            description="Port for socket communication",
+        )
+    )
+    args.append(
+        launch.actions.DeclareLaunchArgument(
+            name="connection_timeout",
+            default_value="30000",
+            description="Connection timeout for socket communication",
+        )
+    )
+    args.append(
+        launch.actions.DeclareLaunchArgument(
+            name="activate_gripper_by_default",
+            default_value="1",
+            description="Activate gripper by default?",
         )
     )
 
@@ -93,6 +128,15 @@ def generate_launch_description():
             "use_fake_hardware:=", LaunchConfiguration("use_fake_hardware"),
             " ",
             "use_socket_communication:=", LaunchConfiguration("use_socket_communication"),
+            " ",
+            "ip_address:=", LaunchConfiguration("ip_address"),
+            " ",
+            "port:=", LaunchConfiguration("port"),
+            " ",
+            "connection_timeout:=", LaunchConfiguration("connection_timeout"),
+            " ",
+            "activate_gripper_by_default:=", LaunchConfiguration("activate_gripper_by_default"),
+            " ",
         ]
     )
     robot_description_param = {
@@ -101,13 +145,13 @@ def generate_launch_description():
         )
     }
 
-    update_rate_config_file = PathJoinSubstitution(
-        [
-            description_pkg_share,
-            "config",
-            "robotiq_update_rate.yaml",
-        ]
-    )
+    # update_rate_config_file = PathJoinSubstitution(
+    #     [
+    #         description_pkg_share,
+    #         "config",
+    #         "robotiq_update_rate.yaml",
+    #     ]
+    # )
 
     controllers_file = "robotiq_controllers.yaml"
     initial_joint_controllers = PathJoinSubstitution(
@@ -119,10 +163,9 @@ def generate_launch_description():
         executable="ros2_control_node",
         parameters=[
             robot_description_param,
-            update_rate_config_file,
+            # update_rate_config_file,
             initial_joint_controllers,
         ],
-        prefix=["gdb -ex run --args"],
     )
 
     robot_state_publisher_node = launch_ros.actions.Node(
@@ -145,29 +188,59 @@ def generate_launch_description():
         executable="spawner",
         arguments=[
             "joint_state_broadcaster",
-            "--controller-manager",
+            "-c",
             "/controller_manager",
+            "--controller-manager-timeout",
+            LaunchConfiguration("controller_spawner_timeout"),
         ],
     )
 
     robotiq_gripper_controller_spawner = launch_ros.actions.Node(
         package="controller_manager",
         executable="spawner",
-        arguments=["robotiq_gripper_controller", "-c", "/controller_manager"],
+        arguments=[
+            "robotiq_gripper_controller",
+            "-c",
+            "/controller_manager",
+            "--controller-manager-timeout",
+            LaunchConfiguration("controller_spawner_timeout"),
+            "--inactive",
+        ],
     )
 
     robotiq_activation_controller_spawner = launch_ros.actions.Node(
         package="controller_manager",
         executable="spawner",
-        arguments=["robotiq_activation_controller", "-c", "/controller_manager"],
+        arguments=[
+            "robotiq_activation_controller",
+            "-c",
+            "/controller_manager",
+            "--controller-manager-timeout",
+            LaunchConfiguration("controller_spawner_timeout"),
+            "--inactive",
+        ],
+    )
+
+    robotiq_forward_command_controller_spawner = launch_ros.actions.Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=[
+            "robotiq_forward_command_controller",
+            "-c",
+            "/controller_manager",
+            "--controller-manager-timeout",
+            LaunchConfiguration("controller_spawner_timeout"),
+            "--inactive",
+        ],
     )
 
     nodes = [
         control_node,
         robot_state_publisher_node,
         joint_state_broadcaster_spawner,
-        #robotiq_gripper_controller_spawner,
+        robotiq_gripper_controller_spawner,
         robotiq_activation_controller_spawner,
+        robotiq_forward_command_controller_spawner,
         rviz_node,
     ]
 

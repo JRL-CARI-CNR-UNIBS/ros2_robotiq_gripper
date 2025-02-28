@@ -13,7 +13,11 @@
         mock_sensor_commands:=false
         include_ros2_control:=true
         com_port:=/dev/ttyUSB0
-        use_socket_communication:=false">
+        use_socket_communication:=false
+        ip_address:=192.168.10.2
+        port:=63352
+        connection_timeout:=30000
+        activate_gripper_by_default:=1">
 
         <!-- ros2 control include -->
         <xacro:include filename="$(find robotiq_description)/urdf/2f_85.ros2_control.xacro" />
@@ -28,7 +32,12 @@
                 use_fake_hardware="${use_fake_hardware}"
                 mock_sensor_commands="${mock_sensor_commands}"
                 com_port="${com_port}"
-                use_socket_communication="${use_socket_communication}"/>
+                use_socket_communication="${use_socket_communication}"
+                ip_address="${ip_address}"
+                port="${port}"
+                connection_timeout="${connection_timeout}"
+                activate_gripper_by_default="${activate_gripper_by_default}"
+            />
         </xacro:if>
 
         <link name="${prefix}robotiq_85_base_link">

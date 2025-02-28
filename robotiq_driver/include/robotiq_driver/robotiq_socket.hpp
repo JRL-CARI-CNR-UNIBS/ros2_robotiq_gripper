@@ -96,7 +96,7 @@ public:
     
     Status connect(double socket_timeout = DEFAULT_TIMEOUT);
     void disconnect();
-    Status activate(const bool auto_calibrate, const double socket_timeout=DEFAULT_TIMEOUT);
+    Status activate(const double socket_timeout=DEFAULT_TIMEOUT);
 
     bool is_connected();
     bool is_active();
@@ -110,6 +110,13 @@ public:
     bool is_moving();
     bool is_moving_received(const MoveResult& res);
     int get_current_position();
+    int get_current_velocity();
+    int get_current_effort();
+
+    bool is_stuck();
+    bool stop_movement();
+    bool reset_velocity();
+
     MoveResult move(int position, int speed, int force);
     MoveResult move_and_wait_for_pos(int position, int speed, int force);
 };

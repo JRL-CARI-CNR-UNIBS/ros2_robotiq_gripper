@@ -3,6 +3,10 @@
     <!-- parameters -->
     <xacro:arg name="use_fake_hardware" default="true" />
     <xacro:arg name="use_socket_communication" default="false" />
+    <xacro:arg name="ip_address" default="192.168.10.2" />
+    <xacro:arg name="port" default="63352" />
+    <xacro:arg name="connection_timeout" default="30000" /> <!-- milliseconds -->
+    <xacro:arg name="activate_gripper_by_default" default="1" /> <!-- 0: false, 1: true -->
 
     <!-- Import macros -->
     <xacro:include filename="$(find robotiq_description)/urdf/robotiq_2f_85_macro.urdf.xacro" />
@@ -12,7 +16,11 @@
         prefix=""
         parent="world"
         use_fake_hardware="$(arg use_fake_hardware)"
-        use_socket_communication="$(arg use_socket_communication)">
+        use_socket_communication="$(arg use_socket_communication)"
+        ip_address="$(arg ip_address)"
+        port="$(arg port)"
+        connection_timeout="$(arg connection_timeout)"
+        activate_gripper_by_default="$(arg activate_gripper_by_default)">
         <origin xyz="0 0 0" rpy="0 0 0" />
     </xacro:robotiq_gripper>
 </robot>

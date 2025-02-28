@@ -9,7 +9,12 @@ using boost::asio::ip::tcp;
 namespace robotiq_driver
 {
 RobotiqSocket::RobotiqSocket(const std::string& address, const int port) 
-    : address_(address), active_(false), port_(port), socket_status_(SocketStatus::DISCONNECTED), open_position_(MIN_POSITION), closed_position_(MAX_POSITION) {}
+    : address_(address),
+      active_(false),
+      port_(port),
+      open_position_(MIN_POSITION),
+      closed_position_(MAX_POSITION),
+      socket_status_(SocketStatus::DISCONNECTED) {}
 
 RobotiqSocket::~RobotiqSocket() {
     disconnect();
@@ -124,13 +129,15 @@ bool RobotiqSocket::is_ack(const std::string& data) {
 }
 
 
-RobotiqSocket::Status RobotiqSocket::activate(const bool auto_calibrate, const double socket_timeout) {
+RobotiqSocket::Status RobotiqSocket::activate(const double socket_timeout) {  
     if(!is_connected()) {
         std::cout << "Gripper is not connected." << std::endl;
         return {SocketStatus::DISCONNECTED, GripperStatus::UNKNOWN}; // If the gripper is not connected, the gripper status is unknown
     }
     
+    // Reset ACT to 0
     send_single_command_and_ack(ReadWriteVariables::ACT, 0);
+    // When setting ACT to one, the Gripper will begin movement to complete its auto-calibration feature
     send_single_command_and_ack(ReadWriteVariables::ACT, 1);
 
     std::cout << "Waiting for activation" << std::endl;
@@ -151,11 +158,11 @@ RobotiqSocket::Status RobotiqSocket::activate(const bool auto_calibrate, const d
 
     std::cout << "Activated." << std::endl;
 
-    // Auto-calibrate position range if desired
-    if (auto_calibrate) {
-        if (!auto_calibration())
-            return {SocketStatus::CONNECTED, GripperStatus::CALIBRATION_FAILED};
-    }
+    // Auto-calibrate position range even if the activation procedure does it already
+    // This allows to set the open_position_ and closed_position_ values
+    if (!auto_calibration())
+        return {SocketStatus::CONNECTED, GripperStatus::CALIBRATION_FAILED};
+
     std::cout << "Gripper activated." << std::endl;
 
     return {SocketStatus::CONNECTED, GripperStatus::ACTIVE};
@@ -208,6 +215,27 @@ bool RobotiqSocket::is_moving_received(const MoveResult& res) {
 
 int RobotiqSocket::get_current_position() {
     return get_var(ReadWriteVariables::POS);
+}
+
+int RobotiqSocket::get_current_velocity() {
+    return get_var(ReadWriteVariables::SPE);
+}
+
+int RobotiqSocket::get_current_effort() {
+    return get_var(ReadWriteVariables::FOR);
+}
+
+bool RobotiqSocket::is_stuck() {
+    return get_var(ReadVariables::OBJ) == static_cast<int>(ObjectStatus::STOPPED_INNER_OBJECT) || 
+           get_var(ReadVariables::OBJ) == static_cast<int>(ObjectStatus::STOPPED_OUTER_OBJECT);
+}
+
+bool RobotiqSocket::stop_movement() {
+    return send_single_command_and_ack(ReadWriteVariables::GTO, 0);
+}
+
+bool RobotiqSocket::reset_velocity() {
+    return send_single_command_and_ack(ReadWriteVariables::SPE, 0);
 }
 
 bool RobotiqSocket::auto_calibration(bool log) {
@@ -291,8 +319,18 @@ RobotiqSocket::MoveResult RobotiqSocket::move_and_wait_for_pos(int position, int
         cur_obj = get_var(ReadVariables::OBJ);
     }
 
+    // If the gripper is stuck, stop the moving action 
+    if(static_cast<ObjectStatus>(cur_obj) == ObjectStatus::STOPPED_INNER_OBJECT || 
+       static_cast<ObjectStatus>(cur_obj) == ObjectStatus::STOPPED_OUTER_OBJECT) {
+        send_single_command_and_ack(ReadWriteVariables::GTO, 0);
+    }
+
     // Report the actual position and the object status
     int final_pos = get_var(ReadWriteVariables::POS);
+
+    // Set the final velocity to 0
+    send_single_command_and_ack(ReadWriteVariables::SPE, 0);
+
     return {true, final_pos, static_cast<ObjectStatus>(cur_obj)};
 }
 } // namespace robotiq_driver
