@@ -357,14 +357,12 @@ void RobotiqSocketHardwareInterface::communication_task()
         gripper_->stop_movement();
         RCLCPP_WARN(LOGGER, "Gripper stopped.");
       }
-      else {
-        // Read state from gripper
-        gripper_current_position_int_.store(gripper_->get_current_position());
-        gripper_current_velocity_int_.store(gripper_->get_current_velocity());
-        // gripper_current_effort_int_.store(gripper_->get_current_effort()); DOES NOT MAKE SENSE: NO FORCE SENSOR INSTALLED
-      }
     }
-    
+
+
+    gripper_current_position_int_.store(gripper_->get_current_position());
+    gripper_current_velocity_int_.store(gripper_->get_current_velocity());
+
     std::this_thread::sleep_for(GRIPPER_COMMS_LOOP_PERIOD);
   }
 }
