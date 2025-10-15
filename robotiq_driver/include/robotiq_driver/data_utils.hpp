@@ -43,14 +43,14 @@ namespace robotiq_driver::data_utils
  * @param bytes The sequence of bytes.
  * @return A string containing the sequence of hex numbers.
  */
-std::string to_hex(const std::vector<uint8_t>& bytes);
+std::string to_hex(const std::vector<uint8_t> & bytes);
 
 /**
  * Convert a sequence of uint16_t into a sequence of hex numbers.
  * @param bytes The sequence of bytes.
  * @return A string containing the sequence of hex numbers.
  */
-std::string to_hex(const std::vector<uint16_t>& bytes);
+std::string to_hex(const std::vector<uint16_t> & bytes);
 
 /**
  * Convert a byte to a binary representation for testing purposes.

@@ -66,7 +66,7 @@ public:
    * @returns CallbackReturn::SUCCESS if required data are provided and can be
    * parsed or CallbackReturn::ERROR if any error happens or data are missing.
    */
-  CallbackReturn on_init(const hardware_interface::HardwareInfo& info) override;
+  CallbackReturn on_init(const hardware_interface::HardwareInfo & info) override;
 
   /**
    * Connect to the hardware.
@@ -74,7 +74,7 @@ public:
    * @returns CallbackReturn::SUCCESS if required data are provided and can be
    * parsed or CallbackReturn::ERROR if any error happens or data are missing.
    */
-  CallbackReturn on_configure(const rclcpp_lifecycle::State& previous_state) override;
+  CallbackReturn on_configure(const rclcpp_lifecycle::State & previous_state) override;
 
   /**
    * This method exposes position and velocity of joints for reading.
@@ -91,24 +91,28 @@ public:
    * @param previous_state Unconfigured, Inactive, Active or Finalized.
    * @returns CallbackReturn::SUCCESS or CallbackReturn::ERROR.
    */
-  CallbackReturn on_activate(const rclcpp_lifecycle::State& previous_state) override;
+  CallbackReturn on_activate(const rclcpp_lifecycle::State & previous_state) override;
 
   /**
    * This method is invoked when the hardware is disconnected.
    * @param previous_state Unconfigured, Inactive, Active or Finalized.
    * @returns CallbackReturn::SUCCESS or CallbackReturn::ERROR.
    */
-  CallbackReturn on_deactivate(const rclcpp_lifecycle::State& previous_state) override;
+  CallbackReturn on_deactivate(const rclcpp_lifecycle::State & previous_state) override;
 
   /**
    * Read data from the hardware.
    */
-  hardware_interface::return_type read(const rclcpp::Time& time, const rclcpp::Duration& period) override;
+  hardware_interface::return_type read(
+    const rclcpp::Time & time,
+    const rclcpp::Duration & period) override;
 
   /**
    * Write data to hardware.
    */
-  hardware_interface::return_type write(const rclcpp::Time& time, const rclcpp::Duration& period) override;
+  hardware_interface::return_type write(
+    const rclcpp::Time & time,
+    const rclcpp::Duration & period) override;
 
 protected:
   // Constants
@@ -120,7 +124,7 @@ protected:
   static constexpr double GRIPPER_MAX_POSITION = 0.085;                            // [m]
   static constexpr double GRIPPER_MAX_SPEED = 0.150;                               // [m/s]
   static constexpr double GRIPPER_MAX_FORCE = 235;                                 // [N]
-  
+
   // Parameters (read from ros2 control XACRO)
   double gripper_closed_pos_rad_ = 0.0; // unused when using GRIPPER_MAX_POSITION
   bool activate_gripper_by_default_ = false;
@@ -139,15 +143,15 @@ protected:
   // Command interfaces (use meters for convenience when issuing commands)
   double gripper_position_command_ = 0.0; // [m]
   double gripper_velocity_command_ = 0.0; // [m/s]
-  double gripper_effort_command_   = 0.0; // [N]
+  double gripper_effort_command_ = 0.0;   // [N]
 
   // Command interfaces to reactivate the gripper
-  double reactivate_gripper_command_= 0.0;
+  double reactivate_gripper_command_ = 0.0;
   double reactivate_gripper_response_ = 0.0;
 
   // Atomic variables read/set by the read/write methods and the communication thread
   std::atomic<uint8_t> write_command_;
-  std::atomic<uint8_t> write_command_previous_;  
+  std::atomic<uint8_t> write_command_previous_;
   std::atomic<uint8_t> write_force_;
   std::atomic<uint8_t> write_speed_;
   std::atomic<uint8_t> gripper_current_position_int_;

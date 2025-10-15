@@ -39,8 +39,8 @@
  */
 class CommandLineUtility
 {
-  using LambdaWithValue = std::function<void(const char*)>;
-  using LambdaWithoutValue = std::function<void()>;
+  using LambdaWithValue = std::function<void (const char *)>;
+  using LambdaWithoutValue = std::function<void ()>;
   using ParameterHandler = std::variant<LambdaWithValue, LambdaWithoutValue>;
 
 public:
@@ -50,7 +50,9 @@ public:
    * @param handler The lambda function to handle the parameter value.
    * @param isMandatory True if the parameter is mandatory, else otherwise.
    */
-  void registerHandler(const std::string& parameter, ParameterHandler handler, bool isMandatory = false);
+  void registerHandler(
+    const std::string & parameter, ParameterHandler handler,
+    bool isMandatory = false);
 
   /**
    * Parse the command line and read all parameters.
@@ -58,7 +60,7 @@ public:
    * @param argv The list of tokens.
    * @return True if the parsing is successful.
    */
-  bool parse(int argc, char* argv[]);
+  bool parse(int argc, char * argv[]);
 
 private:
   // Map that associates a lambda function to each parameter to process the expected value.

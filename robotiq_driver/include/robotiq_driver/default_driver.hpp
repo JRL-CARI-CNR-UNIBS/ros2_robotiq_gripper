@@ -98,10 +98,12 @@ private:
    * @param response_size The response expected size.
    * @return The response or an empty vector if an en error occurred.
    */
-  std::vector<uint8_t> send(const std::vector<uint8_t>& request, size_t response_size) const;
+  std::vector<uint8_t> send(const std::vector<uint8_t> & request, size_t response_size) const;
 
   std::vector<uint8_t> create_read_command(uint16_t first_register, uint8_t num_registers);
-  std::vector<uint8_t> create_write_command(uint16_t first_register, const std::vector<uint16_t>& data);
+  std::vector<uint8_t> create_write_command(
+    uint16_t first_register,
+    const std::vector<uint16_t> & data);
 
   /**
    * @brief Read the current status of the gripper, and update member variables as appropriate.

@@ -42,23 +42,24 @@ class DriverException : public std::exception
   std::string what_;
 
 public:
-  explicit DriverException(const std::string& description)
+  explicit DriverException(const std::string & description)
   {
     std::stringstream ss;
     ss << "DriverException: " << description << ".";
     what_ = ss.str();
   }
 
-  DriverException(const DriverException& other) : what_(other.what_)
+  DriverException(const DriverException & other)
+  : what_(other.what_)
   {
   }
 
   ~DriverException() override = default;
 
   // Disable copy constructors
-  DriverException& operator=(const DriverException&) = delete;
+  DriverException & operator=(const DriverException &) = delete;
 
-  [[nodiscard]] const char* what() const throw() override
+  [[nodiscard]] const char * what() const throw() override
   {
     return what_.c_str();
   }

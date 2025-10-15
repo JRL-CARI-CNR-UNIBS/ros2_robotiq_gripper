@@ -49,7 +49,7 @@ namespace robotiq_driver
 class SerialFactory
 {
 public:
-  virtual std::unique_ptr<Serial> create(const hardware_interface::HardwareInfo& info) const = 0;
+  virtual std::unique_ptr<Serial> create(const hardware_interface::HardwareInfo & info) const = 0;
 };
 
 }  // namespace robotiq_driver

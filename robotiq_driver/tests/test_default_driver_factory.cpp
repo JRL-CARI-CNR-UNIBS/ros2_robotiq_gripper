@@ -40,12 +40,14 @@ namespace robotiq_driver::test
 class TestDriverFactory : public DefaultDriverFactory
 {
 public:
-  explicit TestDriverFactory(std::unique_ptr<Driver> driver) : driver_{ std::move(driver) }
+  explicit TestDriverFactory(std::unique_ptr<Driver> driver)
+  : driver_{std::move(driver)}
   {
   }
 
 protected:
-  std::unique_ptr<Driver> create_driver([[maybe_unused]] const hardware_interface::HardwareInfo& info) const override
+  std::unique_ptr<Driver> create_driver(
+    [[maybe_unused]] const hardware_interface::HardwareInfo & info) const override
   {
     return std::move(driver_);
   }
@@ -74,7 +76,7 @@ TEST(TestDefaultDriverFactory, create_with_default_parameters)
   EXPECT_CALL(*driver, activate()).Times(0);
   EXPECT_CALL(*driver, deactivate()).Times(0);
 
-  TestDriverFactory driver_factory{ std::move(driver) };
+  TestDriverFactory driver_factory{std::move(driver)};
   auto created_driver = driver_factory.create(info);
 }
 
@@ -102,7 +104,7 @@ TEST(TestDefaultDriverFactory, create_with_given_parameters)
   EXPECT_CALL(*driver, activate()).Times(0);
   EXPECT_CALL(*driver, deactivate()).Times(0);
 
-  TestDriverFactory driver_factory{ std::move(driver) };
+  TestDriverFactory driver_factory{std::move(driver)};
   auto created_driver = driver_factory.create(info);
 }
 }  // namespace robotiq_driver::test

@@ -59,9 +59,9 @@ public:
   void close() override;
 
   [[nodiscard]] std::vector<uint8_t> read(size_t size = 1) override;
-  void write(const std::vector<uint8_t>& data) override;
+  void write(const std::vector<uint8_t> & data) override;
 
-  void set_port(const std::string& port) override;
+  void set_port(const std::string & port) override;
   [[nodiscard]] std::string get_port() const override;
 
   void set_timeout(std::chrono::milliseconds timeout_ms) override;

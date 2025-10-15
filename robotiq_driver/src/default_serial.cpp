@@ -33,7 +33,8 @@
 namespace robotiq_driver
 {
 
-DefaultSerial::DefaultSerial() : serial_{ std::make_unique<serial::Serial>() }
+DefaultSerial::DefaultSerial()
+: serial_{std::make_unique<serial::Serial>()}
 {
 }
 
@@ -56,27 +57,27 @@ std::vector<uint8_t> DefaultSerial::read(size_t size)
 {
   std::vector<uint8_t> data;
   size_t bytes_read = serial_->read(data, size);
-  if (bytes_read != size)
-  {
-    const auto error_msg = "Requested " + std::to_string(size) + " bytes, but got " + std::to_string(bytes_read);
+  if (bytes_read != size) {
+    const auto error_msg = "Requested " + std::to_string(size) + " bytes, but got " +
+      std::to_string(bytes_read);
     THROW(serial::IOException, error_msg.c_str());
   }
   return data;
 }
 
-void DefaultSerial::write(const std::vector<uint8_t>& data)
+void DefaultSerial::write(const std::vector<uint8_t> & data)
 {
   std::size_t num_bytes_written = serial_->write(data);
   serial_->flush();
-  if (num_bytes_written != data.size())
-  {
+  if (num_bytes_written != data.size()) {
     const auto error_msg =
-        "Attempted to write " + std::to_string(data.size()) + " bytes, but wrote " + std::to_string(num_bytes_written);
+      "Attempted to write " + std::to_string(data.size()) + " bytes, but wrote " + std::to_string(
+      num_bytes_written);
     THROW(serial::IOException, error_msg.c_str());
   }
 }
 
-void DefaultSerial::set_port(const std::string& port)
+void DefaultSerial::set_port(const std::string & port)
 {
   serial_->setPort(port);
 }
@@ -88,14 +89,15 @@ std::string DefaultSerial::get_port() const
 
 void DefaultSerial::set_timeout(std::chrono::milliseconds timeout)
 {
-  serial::Timeout simple_timeout = serial::Timeout::simpleTimeout(static_cast<uint32_t>(timeout.count()));
+  serial::Timeout simple_timeout =
+    serial::Timeout::simpleTimeout(static_cast<uint32_t>(timeout.count()));
   serial_->setTimeout(simple_timeout);
 }
 
 std::chrono::milliseconds DefaultSerial::get_timeout() const
 {
   uint32_t timeout = serial_->getTimeout().read_timeout_constant;
-  return std::chrono::milliseconds{ timeout };
+  return std::chrono::milliseconds{timeout};
 }
 
 void DefaultSerial::set_baudrate(uint32_t baudrate)

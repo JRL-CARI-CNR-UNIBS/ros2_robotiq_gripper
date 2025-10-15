@@ -45,30 +45,34 @@ constexpr auto kBaudrateAddressParamDefault = 115200;
 constexpr auto kTimeoutParamName = "timeout";
 constexpr auto kTimeoutParamDefault = 0.5;
 
-std::unique_ptr<Serial> DefaultSerialFactory::create(const hardware_interface::HardwareInfo& info) const
+std::unique_ptr<Serial> DefaultSerialFactory::create(const hardware_interface::HardwareInfo & info)
+const
 {
   RCLCPP_INFO(kLogger, "Reading %s...", kUsbPortParamName);
   std::string usb_port = info.hardware_parameters.count(kUsbPortParamName) ?
-                             info.hardware_parameters.at(kUsbPortParamName) :
-                             kUsbPortParamDefault;
+    info.hardware_parameters.at(kUsbPortParamName) :
+    kUsbPortParamDefault;
   RCLCPP_INFO(kLogger, "%s: %s", kUsbPortParamName, usb_port.c_str());
 
   RCLCPP_INFO(kLogger, "Reading %s...", kBaudrateParamName);
   uint32_t baudrate = info.hardware_parameters.count(kBaudrateParamName) ?
-                          static_cast<uint32_t>(std::stoul(info.hardware_parameters.at(kBaudrateParamName))) :
-                          kBaudrateAddressParamDefault;
+    static_cast<uint32_t>(std::stoul(info.hardware_parameters.at(kBaudrateParamName))) :
+    kBaudrateAddressParamDefault;
   RCLCPP_INFO(kLogger, "%s: %dbps", kBaudrateParamName, baudrate);
 
   RCLCPP_INFO(kLogger, "Reading %s...", kTimeoutParamName);
   double timeout = info.hardware_parameters.count(kTimeoutParamName) ?
-                       std::stod(info.hardware_parameters.at(kTimeoutParamName)) :
-                       kTimeoutParamDefault;
+    std::stod(info.hardware_parameters.at(kTimeoutParamName)) :
+    kTimeoutParamDefault;
   RCLCPP_INFO(kLogger, "%s: %fs", kTimeoutParamName, timeout);
 
   auto serial = create_serial();
   serial->set_port(usb_port);
   serial->set_baudrate(baudrate);
-  serial->set_timeout(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::duration<double>(timeout)));
+  serial->set_timeout(
+    std::chrono::duration_cast<std::chrono::milliseconds>(
+      std::chrono::duration<double>(
+        timeout)));
   return serial;
 }
 

@@ -48,7 +48,7 @@ constexpr double kGripperMaxSpeed = 0.150;  // mm/s
 constexpr double kGripperMaxforce = 235;    // N
 constexpr uint8_t kGripperRange = kGripperMaxPos - kGripperMinPos;
 
-constexpr auto kGripperCommsLoopPeriod = std::chrono::milliseconds{ 10 };
+constexpr auto kGripperCommsLoopPeriod = std::chrono::milliseconds{10};
 
 namespace robotiq_driver
 {
@@ -60,24 +60,24 @@ RobotiqGripperHardwareInterface::RobotiqGripperHardwareInterface()
 RobotiqGripperHardwareInterface::~RobotiqGripperHardwareInterface()
 {
   communication_thread_is_running_.store(false);
-  if (communication_thread_.joinable())
-  {
+  if (communication_thread_.joinable()) {
     communication_thread_.join();
   }
 }
 
 // This constructor is use for testing only.
-RobotiqGripperHardwareInterface::RobotiqGripperHardwareInterface(std::unique_ptr<DriverFactory> driver_factory)
-  : driver_factory_{ std::move(driver_factory) }
+RobotiqGripperHardwareInterface::RobotiqGripperHardwareInterface(
+  std::unique_ptr<DriverFactory> driver_factory)
+: driver_factory_{std::move(driver_factory)}
 {
 }
 
-hardware_interface::CallbackReturn RobotiqGripperHardwareInterface::on_init(const hardware_interface::HardwareInfo& info)
+hardware_interface::CallbackReturn RobotiqGripperHardwareInterface::on_init(
+  const hardware_interface::HardwareInfo & info)
 {
   RCLCPP_DEBUG(kLogger, "on_init");
 
-  if (hardware_interface::SystemInterface::on_init(info) != CallbackReturn::SUCCESS)
-  {
+  if (hardware_interface::SystemInterface::on_init(info) != CallbackReturn::SUCCESS) {
     return CallbackReturn::ERROR;
   }
 
@@ -90,49 +90,46 @@ hardware_interface::CallbackReturn RobotiqGripperHardwareInterface::on_init(cons
   reactivate_gripper_cmd_ = NO_NEW_CMD_;
   reactivate_gripper_async_cmd_.store(false);
 
-  const hardware_interface::ComponentInfo& joint = info_.joints[0];
+  const hardware_interface::ComponentInfo & joint = info_.joints[0];
 
   // There is one command interface: position.
-  if (joint.command_interfaces.size() != 1)
-  {
-    RCLCPP_FATAL(kLogger, "Joint '%s' has %zu command interfaces found. 1 expected.", joint.name.c_str(),
-                 joint.command_interfaces.size());
+  if (joint.command_interfaces.size() != 1) {
+    RCLCPP_FATAL(
+      kLogger, "Joint '%s' has %zu command interfaces found. 1 expected.", joint.name.c_str(),
+      joint.command_interfaces.size());
     return CallbackReturn::ERROR;
   }
 
-  if (joint.command_interfaces[0].name != hardware_interface::HW_IF_POSITION)
-  {
-    RCLCPP_FATAL(kLogger, "Joint '%s' has %s command interfaces found. '%s' expected.", joint.name.c_str(),
-                 joint.command_interfaces[0].name.c_str(), hardware_interface::HW_IF_POSITION);
+  if (joint.command_interfaces[0].name != hardware_interface::HW_IF_POSITION) {
+    RCLCPP_FATAL(
+      kLogger, "Joint '%s' has %s command interfaces found. '%s' expected.", joint.name.c_str(),
+      joint.command_interfaces[0].name.c_str(), hardware_interface::HW_IF_POSITION);
     return CallbackReturn::ERROR;
   }
 
   // There are two state interfaces: position and velocity.
-  if (joint.state_interfaces.size() != 2)
-  {
-    RCLCPP_FATAL(kLogger, "Joint '%s' has %zu state interface. 2 expected.", joint.name.c_str(),
-                 joint.state_interfaces.size());
+  if (joint.state_interfaces.size() != 2) {
+    RCLCPP_FATAL(
+      kLogger, "Joint '%s' has %zu state interface. 2 expected.", joint.name.c_str(),
+      joint.state_interfaces.size());
     return CallbackReturn::ERROR;
   }
 
-  for (int i = 0; i < 2; ++i)
-  {
+  for (int i = 0; i < 2; ++i) {
     if (!(joint.state_interfaces[i].name == hardware_interface::HW_IF_POSITION ||
-          joint.state_interfaces[i].name == hardware_interface::HW_IF_VELOCITY))
+      joint.state_interfaces[i].name == hardware_interface::HW_IF_VELOCITY))
     {
-      RCLCPP_FATAL(kLogger, "Joint '%s' has %s state interface. Expected %s or %s.", joint.name.c_str(),
-                   joint.state_interfaces[i].name.c_str(), hardware_interface::HW_IF_POSITION,
-                   hardware_interface::HW_IF_VELOCITY);
+      RCLCPP_FATAL(
+        kLogger, "Joint '%s' has %s state interface. Expected %s or %s.", joint.name.c_str(),
+        joint.state_interfaces[i].name.c_str(), hardware_interface::HW_IF_POSITION,
+        hardware_interface::HW_IF_VELOCITY);
       return CallbackReturn::ERROR;
     }
   }
 
-  try
-  {
+  try {
     driver_ = driver_factory_->create(info_);
-  }
-  catch (const std::exception& e)
-  {
+  } catch (const std::exception & e) {
     RCLCPP_FATAL(kLogger, "Failed to create a driver: %s", e.what());
     return CallbackReturn::ERROR;
   }
@@ -141,99 +138,106 @@ hardware_interface::CallbackReturn RobotiqGripperHardwareInterface::on_init(cons
 }
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
-RobotiqGripperHardwareInterface::on_configure(const rclcpp_lifecycle::State& previous_state)
+RobotiqGripperHardwareInterface::on_configure(const rclcpp_lifecycle::State & previous_state)
 {
   RCLCPP_DEBUG(kLogger, "on_configure");
-  try
-  {
-    if (hardware_interface::SystemInterface::on_configure(previous_state) != CallbackReturn::SUCCESS)
+  try {
+    if (hardware_interface::SystemInterface::on_configure(previous_state) !=
+      CallbackReturn::SUCCESS)
     {
       return CallbackReturn::ERROR;
     }
 
     // Open the serial port and handshake.
     bool connected = driver_->connect();
-    if (!connected)
-    {
+    if (!connected) {
       RCLCPP_ERROR(kLogger, "Cannot connect to the Robotiq gripper");
       return CallbackReturn::ERROR;
     }
-  }
-  catch (const std::exception& e)
-  {
+  } catch (const std::exception & e) {
     RCLCPP_ERROR(kLogger, "Cannot configure the Robotiq gripper: %s", e.what());
     return CallbackReturn::ERROR;
   }
   return CallbackReturn::SUCCESS;
 }
 
-std::vector<hardware_interface::StateInterface> RobotiqGripperHardwareInterface::export_state_interfaces()
+std::vector<hardware_interface::StateInterface> RobotiqGripperHardwareInterface::
+export_state_interfaces()
 {
   RCLCPP_DEBUG(kLogger, "export_state_interfaces");
 
   std::vector<hardware_interface::StateInterface> state_interfaces;
 
   state_interfaces.emplace_back(
-      hardware_interface::StateInterface(info_.joints[0].name, hardware_interface::HW_IF_POSITION, &gripper_position_));
+    hardware_interface::StateInterface(
+      info_.joints[0].name, hardware_interface::HW_IF_POSITION,
+      &gripper_position_));
   state_interfaces.emplace_back(
-      hardware_interface::StateInterface(info_.joints[0].name, hardware_interface::HW_IF_VELOCITY, &gripper_velocity_));
+    hardware_interface::StateInterface(
+      info_.joints[0].name, hardware_interface::HW_IF_VELOCITY,
+      &gripper_velocity_));
 
   return state_interfaces;
 }
 
-std::vector<hardware_interface::CommandInterface> RobotiqGripperHardwareInterface::export_command_interfaces()
+std::vector<hardware_interface::CommandInterface> RobotiqGripperHardwareInterface::
+export_command_interfaces()
 {
   RCLCPP_DEBUG(kLogger, "export_command_interfaces");
 
   std::vector<hardware_interface::CommandInterface> command_interfaces;
 
-  command_interfaces.emplace_back(hardware_interface::CommandInterface(
+  command_interfaces.emplace_back(
+    hardware_interface::CommandInterface(
       info_.joints[0].name, hardware_interface::HW_IF_POSITION, &gripper_position_command_));
 
   command_interfaces.emplace_back(
-      hardware_interface::CommandInterface(info_.joints[0].name, "set_gripper_max_velocity", &gripper_speed_));
+    hardware_interface::CommandInterface(
+      info_.joints[0].name, "set_gripper_max_velocity",
+      &gripper_speed_));
   gripper_speed_ = info_.hardware_parameters.count("gripper_speed_multiplier") ?
-                       info_.hardware_parameters.count("gripper_speed_multiplier") :
-                       1.0;
+    info_.hardware_parameters.count("gripper_speed_multiplier") :
+    1.0;
 
   command_interfaces.emplace_back(
-      hardware_interface::CommandInterface(info_.joints[0].name, "set_gripper_max_effort", &gripper_force_));
+    hardware_interface::CommandInterface(
+      info_.joints[0].name, "set_gripper_max_effort",
+      &gripper_force_));
   gripper_force_ = info_.hardware_parameters.count("gripper_force_multiplier") ?
-                       info_.hardware_parameters.count("gripper_force_multiplier") :
-                       1.0;
+    info_.hardware_parameters.count("gripper_force_multiplier") :
+    1.0;
 
   command_interfaces.emplace_back(
-      hardware_interface::CommandInterface("reactivate_gripper", "reactivate_gripper_cmd", &reactivate_gripper_cmd_));
-  command_interfaces.emplace_back(hardware_interface::CommandInterface(
+    hardware_interface::CommandInterface(
+      "reactivate_gripper", "reactivate_gripper_cmd",
+      &reactivate_gripper_cmd_));
+  command_interfaces.emplace_back(
+    hardware_interface::CommandInterface(
       "reactivate_gripper", "reactivate_gripper_response", &reactivate_gripper_response_));
 
   return command_interfaces;
 }
 
 hardware_interface::CallbackReturn
-RobotiqGripperHardwareInterface::on_activate(const rclcpp_lifecycle::State& /*previous_state*/)
+RobotiqGripperHardwareInterface::on_activate(const rclcpp_lifecycle::State & /*previous_state*/)
 {
   RCLCPP_DEBUG(kLogger, "on_activate");
 
   // set some default values for joints
-  if (std::isnan(gripper_position_))
-  {
+  if (std::isnan(gripper_position_)) {
     gripper_position_ = 0;
     gripper_velocity_ = 0;
     gripper_position_command_ = 0;
   }
 
   // Activate the gripper.
-  try
-  {
+  try {
     driver_->deactivate();
     driver_->activate();
 
     communication_thread_is_running_.store(true);
-    communication_thread_ = std::thread([this] { this->background_task(); });
-  }
-  catch (const std::exception& e)
-  {
+    communication_thread_ = std::thread([this] {this->background_task();});
+  } catch (const std::exception & e) {
     RCLCPP_FATAL(kLogger, "Failed to communicate with the Robotiq gripper: %s", e.what());
     return CallbackReturn::ERROR;
   }
@@ -243,23 +247,19 @@ RobotiqGripperHardwareInterface::on_activate(const rclcpp_lifecycle::State& /*pr
 }
 
 hardware_interface::CallbackReturn
-RobotiqGripperHardwareInterface::on_deactivate(const rclcpp_lifecycle::State& /*previous_state*/)
+RobotiqGripperHardwareInterface::on_deactivate(const rclcpp_lifecycle::State & /*previous_state*/)
 {
   RCLCPP_DEBUG(kLogger, "on_deactivate");
 
   communication_thread_is_running_.store(false);
   communication_thread_.join();
-  if (communication_thread_.joinable())
-  {
+  if (communication_thread_.joinable()) {
     communication_thread_.join();
   }
 
-  try
-  {
+  try {
     driver_->deactivate();
-  }
-  catch (const std::exception& e)
-  {
+  } catch (const std::exception & e) {
     RCLCPP_ERROR(kLogger, "Failed to deactivate the Robotiq gripper: %s", e.what());
     return CallbackReturn::ERROR;
   }
@@ -267,20 +267,20 @@ RobotiqGripperHardwareInterface::on_deactivate(const rclcpp_lifecycle::State& /*
   return CallbackReturn::SUCCESS;
 }
 
-hardware_interface::return_type RobotiqGripperHardwareInterface::read(const rclcpp::Time& /*time*/,
-                                                                      const rclcpp::Duration& /*period*/)
+hardware_interface::return_type RobotiqGripperHardwareInterface::read(
+  const rclcpp::Time & /*time*/,
+  const rclcpp::Duration & /*period*/)
 {
-  gripper_position_ = gripper_closed_pos_ * (gripper_current_state_.load() - kGripperMinPos) / kGripperRange;
+  gripper_position_ = gripper_closed_pos_ * (gripper_current_state_.load() - kGripperMinPos) /
+    kGripperRange;
 
-  if (!std::isnan(reactivate_gripper_cmd_))
-  {
+  if (!std::isnan(reactivate_gripper_cmd_)) {
     RCLCPP_INFO(kLogger, "Sending gripper reactivation request.");
     reactivate_gripper_async_cmd_.store(true);
     reactivate_gripper_cmd_ = NO_NEW_CMD_;
   }
 
-  if (reactivate_gripper_async_response_.load().has_value())
-  {
+  if (reactivate_gripper_async_response_.load().has_value()) {
     reactivate_gripper_response_ = reactivate_gripper_async_response_.load().value();
     reactivate_gripper_async_response_.store(std::nullopt);
   }
@@ -288,10 +288,12 @@ hardware_interface::return_type RobotiqGripperHardwareInterface::read(const rclc
   return hardware_interface::return_type::OK;
 }
 
-hardware_interface::return_type RobotiqGripperHardwareInterface::write(const rclcpp::Time& /*time*/,
-                                                                       const rclcpp::Duration& /*period*/)
+hardware_interface::return_type RobotiqGripperHardwareInterface::write(
+  const rclcpp::Time & /*time*/,
+  const rclcpp::Duration & /*period*/)
 {
-  double gripper_pos = (gripper_position_command_ / gripper_closed_pos_) * kGripperRange + kGripperMinPos;
+  double gripper_pos = (gripper_position_command_ / gripper_closed_pos_) * kGripperRange +
+    kGripperMinPos;
   gripper_pos = std::max(std::min(gripper_pos, 255.0), 0.0);
   write_command_.store(uint8_t(gripper_pos));
   gripper_speed_ = kGripperMaxSpeed * std::clamp(fabs(gripper_speed_) / kGripperMaxSpeed, 0.0, 1.0);
@@ -304,14 +306,11 @@ hardware_interface::return_type RobotiqGripperHardwareInterface::write(const rcl
 
 void RobotiqGripperHardwareInterface::background_task()
 {
-  while (communication_thread_is_running_.load())
-  {
-    try
-    {
+  while (communication_thread_is_running_.load()) {
+    try {
       // Re-activate the gripper
       // (this can be used, for example, to re-run the auto-calibration).
-      if (reactivate_gripper_async_cmd_.load())
-      {
+      if (reactivate_gripper_async_cmd_.load()) {
         this->driver_->deactivate();
         this->driver_->activate();
         reactivate_gripper_async_cmd_.store(false);
@@ -325,9 +324,7 @@ void RobotiqGripperHardwareInterface::background_task()
 
       // Read the state of the gripper.
       gripper_current_state_.store(this->driver_->get_gripper_position());
-    }
-    catch (std::exception& e)
-    {
+    } catch (std::exception & e) {
       RCLCPP_ERROR(kLogger, "Error: %s", e.what());
     }
 
@@ -339,4 +336,6 @@ void RobotiqGripperHardwareInterface::background_task()
 
 #include "pluginlib/class_list_macros.hpp"
 
-PLUGINLIB_EXPORT_CLASS(robotiq_driver::RobotiqGripperHardwareInterface, hardware_interface::SystemInterface)
+PLUGINLIB_EXPORT_CLASS(
+  robotiq_driver::RobotiqGripperHardwareInterface,
+  hardware_interface::SystemInterface)

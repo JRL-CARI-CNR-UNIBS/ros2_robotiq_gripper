@@ -38,13 +38,11 @@ constexpr std::array<char, 16> vChars = {
   '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
 };
 
-std::string to_hex(const std::vector<uint8_t>& bytes)
+std::string to_hex(const std::vector<uint8_t> & bytes)
 {
   std::string hex;
-  for (auto it = std::begin(bytes); it != std::end(bytes); ++it)
-  {
-    if (it != bytes.begin())
-    {
+  for (auto it = std::begin(bytes); it != std::end(bytes); ++it) {
+    if (it != bytes.begin()) {
       hex += " ";
     }
     hex += "";
@@ -56,13 +54,11 @@ std::string to_hex(const std::vector<uint8_t>& bytes)
   return hex;
 }
 
-std::string to_hex(const std::vector<uint16_t>& bytes)
+std::string to_hex(const std::vector<uint16_t> & bytes)
 {
   std::string hex;
-  for (auto it = std::begin(bytes); it != std::end(bytes); ++it)
-  {
-    if (it != bytes.begin())
-    {
+  for (auto it = std::begin(bytes); it != std::end(bytes); ++it) {
+    if (it != bytes.begin()) {
       hex += " ";
     }
     hex += "";
@@ -79,8 +75,7 @@ std::string to_hex(const std::vector<uint16_t>& bytes)
 std::string to_binary_string(const uint8_t byte)
 {
   std::string result = "";
-  for (int i = 7; i >= 0; --i)
-  {
+  for (int i = 7; i >= 0; --i) {
     result += ((byte >> i) & 1) ? '1' : '0';
   }
   return result;

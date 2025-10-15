@@ -40,7 +40,8 @@ namespace robotiq_driver::test
 class StubSerialFactory : public DefaultSerialFactory
 {
 public:
-  explicit StubSerialFactory(std::unique_ptr<MockSerial> serial) : serial_{ std::move(serial) }
+  explicit StubSerialFactory(std::unique_ptr<MockSerial> serial)
+  : serial_{std::move(serial)}
   {
   }
 
@@ -68,7 +69,7 @@ TEST(TestDefaultSerialFactory, create_with_default_parameters)
 
   EXPECT_CALL(*serial, set_port("/dev/ttyUSB0"));
   EXPECT_CALL(*serial, set_baudrate(115200));
-  EXPECT_CALL(*serial, set_timeout(std::chrono::milliseconds{ 500 }));
+  EXPECT_CALL(*serial, set_timeout(std::chrono::milliseconds{500}));
 
   StubSerialFactory serial_factory(std::move(serial));
   auto created_serial = serial_factory.create(info);

@@ -50,10 +50,11 @@ public:
    * @param info The hardware information.
    * @return A driver to interact with the hardware.
    */
-  std::unique_ptr<Driver> create(const hardware_interface::HardwareInfo& info) const;
+  std::unique_ptr<Driver> create(const hardware_interface::HardwareInfo & info) const;
 
 protected:
   // Seam for testing.
-  virtual std::unique_ptr<Driver> create_driver(const hardware_interface::HardwareInfo& info) const;
+  virtual std::unique_ptr<Driver> create_driver(
+    const hardware_interface::HardwareInfo & info) const;
 };
 }  // namespace robotiq_driver

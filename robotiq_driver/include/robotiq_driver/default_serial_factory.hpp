@@ -49,7 +49,7 @@ public:
    * @param info The hardware information.
    * @return A sarial interface to communicate with the hardware.
    */
-  std::unique_ptr<Serial> create(const hardware_interface::HardwareInfo& info) const;
+  std::unique_ptr<Serial> create(const hardware_interface::HardwareInfo & info) const;
 
 protected:
   // Seam for testing.

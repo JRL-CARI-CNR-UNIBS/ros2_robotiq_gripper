@@ -55,7 +55,7 @@ namespace robotiq_driver::test
 TEST(TestRobotiqGripperHardwareInterface, load_urdf)
 {
   std::string urdf_control_ =
-      R"(
+    R"(
          <ros2_control name="robotiq_driver_ros2_control" type="system">
            <hardware>
              <plugin>robotiq_driver/RobotiqGripperHardwareInterface</plugin>
@@ -74,7 +74,8 @@ TEST(TestRobotiqGripperHardwareInterface, load_urdf)
          </ros2_control>
        )";
 
-  auto urdf = ros2_control_test_assets::urdf_head + urdf_control_ + ros2_control_test_assets::urdf_tail;
+  auto urdf = ros2_control_test_assets::urdf_head + urdf_control_ +
+    ros2_control_test_assets::urdf_tail;
   hardware_interface::ResourceManager rm(urdf);
 
   // Check interfaces

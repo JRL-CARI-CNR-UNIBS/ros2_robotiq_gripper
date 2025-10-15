@@ -78,7 +78,7 @@ public:
    * @throw serial::SerialException
    * @throw serial::IOException
    */
-  virtual void write(const std::vector<uint8_t>& data) = 0;
+  virtual void write(const std::vector<uint8_t> & data) = 0;
 
   /**
    * Sets the serial port identifier.
@@ -87,7 +87,7 @@ public:
    * "/dev/ttyS0" on Linux.
    * @throw std::invalid_argument
    */
-  virtual void set_port(const std::string& port) = 0;
+  virtual void set_port(const std::string & port) = 0;
 
   /**
    * Gets the serial port identifier.
