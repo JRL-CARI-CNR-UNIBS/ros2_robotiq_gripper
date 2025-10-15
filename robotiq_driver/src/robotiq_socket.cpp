@@ -171,7 +171,7 @@ RobotiqSocket::Status RobotiqSocket::activate(const double socket_timeout)
   // Auto-calibrate position range even if the activation procedure does it already
   // This allows to set the open_position_ and closed_position_ values
   if (!auto_calibration()) {
-    return {SocketStatus::CONNECTED, GripperStatus::CALIBRATION_FAILED}
+    return {SocketStatus::CONNECTED, GripperStatus::CALIBRATION_FAILED};
   }
 
   std::cout << "Gripper activated." << std::endl;
