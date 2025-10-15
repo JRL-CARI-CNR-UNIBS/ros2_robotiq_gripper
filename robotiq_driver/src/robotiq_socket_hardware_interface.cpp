@@ -62,6 +62,10 @@ hardware_interface::CallbackReturn RobotiqSocketHardwareInterface::on_init(const
 
   // Read parameters.
   gripper_closed_pos_rad_ = stod(info_.hardware_parameters["gripper_closed_position"]);
+  gripper_max_speed_ = info_.hardware_parameters.count("gripper_max_speed") ?
+                          stod(info_.hardware_parameters["gripper_max_speed"]) :
+                          0.150;
+
 
   gripper_position_ = std::numeric_limits<double>::quiet_NaN();
   gripper_velocity_ = std::numeric_limits<double>::quiet_NaN();
@@ -276,8 +280,8 @@ hardware_interface::return_type RobotiqSocketHardwareInterface::read(const rclcp
     (gripper_current_position_int_.load() - gripper_->get_open_position()) / gripper_->get_range();
 
   // Gripper velocity in rad/s (small-angle approximation) 
-  gripper_velocity_ = gripper_current_velocity_int_.load() * GRIPPER_MAX_SPEED / RobotiqSocket::MAX_SPEED *
-    gripper_closed_pos_rad_ / GRIPPER_MAX_POSITION;
+  gripper_velocity_ = gripper_current_velocity_int_.load() * gripper_max_speed_ / RobotiqSocket::MAX_SPEED *
+    gripper_closed_pos_rad_ / gripper_closed_pos_rad_;
 
   // Gripper effort in N -> DOES NOT MAKE SENSE: NO FORCE SENSOR INSTALLED
   // gripper_effort_ = gripper_current_effort_int_.load() * GRIPPER_MAX_FORCE / RobotiqSocket::MAX_FORCE;
@@ -296,6 +300,8 @@ hardware_interface::return_type RobotiqSocketHardwareInterface::read(const rclcp
     reactivate_gripper_async_response_.store(std::nullopt);
   }
 
+  RCLCPP_INFO(LOGGER, "Gripper position: %.3f m, velocity: %.3f m/s", gripper_position_, gripper_velocity_);
+
 
   return hardware_interface::return_type::OK;
 }
@@ -304,13 +310,14 @@ hardware_interface::return_type RobotiqSocketHardwareInterface::write(const rclc
                                                                        const rclcpp::Duration& /*period*/)
 {
   // Gripper position command in ticks [0-255] from gripper_position_command_ in meters [0-0.085]
-  double gripper_position_cmd = (gripper_position_command_ / GRIPPER_MAX_POSITION) * gripper_->get_range() + gripper_->get_open_position();
+  
+  double gripper_position_cmd = (gripper_position_command_ / gripper_closed_pos_rad_) * gripper_->get_range() + gripper_->get_open_position();
   gripper_position_cmd = std::max(std::min(gripper_position_cmd, 
                                            static_cast<double>(RobotiqSocket::MAX_POSITION)), 
                                   static_cast<double>(RobotiqSocket::MIN_POSITION));
 
   // Gripper velocity command in ticks/s [0-255] from gripper_velocity_command_ in m/s [0-0.150]
-  double gripper_velocity_cmd = RobotiqSocket::MAX_SPEED * std::clamp(fabs(gripper_velocity_command_) / GRIPPER_MAX_SPEED, 0.0, 1.0);
+  double gripper_velocity_cmd = RobotiqSocket::MAX_SPEED * std::clamp(fabs(gripper_velocity_command_) / gripper_max_speed_, 0.0, 1.0);
   
   // Gripper effort command in ticks [0-255] from gripper_effort_command_ in N [0-235]
   double gripper_effort_cmd = RobotiqSocket::MAX_FORCE * std::clamp(fabs(gripper_effort_command_) / GRIPPER_MAX_FORCE, 0.0, 1.0);
@@ -343,7 +350,7 @@ void RobotiqSocketHardwareInterface::communication_task()
       if(write_command_.load() != write_command_previous_.load()){
         auto res = gripper_->move(write_command_.load(), write_speed_.load(), write_force_.load());
         write_command_previous_.store(write_command_.load());
-        double write_command_meters = GRIPPER_MAX_POSITION * 
+        double write_command_meters = gripper_closed_pos_rad_ * 
           (write_command_.load() - gripper_->get_open_position()) / gripper_->get_range();
         RCLCPP_INFO(LOGGER, "Gripper moving to position: %.3f m", write_command_meters);
         while (!gripper_->is_moving_received(res)) {
@@ -358,8 +365,6 @@ void RobotiqSocketHardwareInterface::communication_task()
         RCLCPP_WARN(LOGGER, "Gripper stopped.");
       }
     }
-
-
     gripper_current_position_int_.store(gripper_->get_current_position());
     gripper_current_velocity_int_.store(gripper_->get_current_velocity());
 

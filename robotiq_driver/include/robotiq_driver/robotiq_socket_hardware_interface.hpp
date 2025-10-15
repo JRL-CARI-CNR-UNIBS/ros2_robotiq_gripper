@@ -117,12 +117,13 @@ protected:
   static constexpr auto GRIPPER_COMMS_LOOP_PERIOD = std::chrono::milliseconds{100}; // Communication loop period [ms]
   static constexpr int NUM_STATE_INTERFACES = 2;
   static constexpr int NUM_COMMAND_INTERFACES = 3;
-  static constexpr double GRIPPER_MAX_POSITION = 0.085;                            // [m]
-  static constexpr double GRIPPER_MAX_SPEED = 0.150;                               // [m/s]
+  // static constexpr double GRIPPER_MAX_POSITION = 0.085;                            // [m]
+  // static constexpr double GRIPPER_MAX_SPEED = 0.150;                               // [m/s]
   static constexpr double GRIPPER_MAX_FORCE = 235;                                 // [N]
   
   // Parameters (read from ros2 control XACRO)
   double gripper_closed_pos_rad_ = 0.0; // unused when using GRIPPER_MAX_POSITION
+  double gripper_max_speed_ = 0.150;
   bool activate_gripper_by_default_ = false;
 
   // Logger
