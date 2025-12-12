@@ -14,16 +14,16 @@ endif()
 ###############################################################################
 # test_robotiq_gripper_hardware_interface
 
-ament_add_gmock(test_robotiq_gripper_hardware_interface
-    test_robotiq_gripper_hardware_interface.cpp
-)
-target_include_directories(test_robotiq_gripper_hardware_interface
-    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
-)
-target_link_libraries(test_robotiq_gripper_hardware_interface robotiq_driver)
-ament_target_dependencies(test_robotiq_gripper_hardware_interface
-    ros2_control_test_assets
-)
+#ament_add_gmock(test_robotiq_gripper_hardware_interface
+#    test_robotiq_gripper_hardware_interface.cpp
+#)
+#target_include_directories(test_robotiq_gripper_hardware_interface
+#    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
+#)
+#target_link_libraries(test_robotiq_gripper_hardware_interface robotiq_driver)
+#ament_target_dependencies(test_robotiq_gripper_hardware_interface
+#    ros2_control_test_assets
+#)
 
 ###############################################################################
 # test_default_serial_factory

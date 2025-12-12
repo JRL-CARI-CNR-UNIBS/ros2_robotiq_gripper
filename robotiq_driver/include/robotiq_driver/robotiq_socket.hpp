@@ -4,6 +4,7 @@
 #include <utility>
 #include <memory>
 #include <boost/asio.hpp>
+#include <map>
 
 using boost::asio::ip::tcp;
 
