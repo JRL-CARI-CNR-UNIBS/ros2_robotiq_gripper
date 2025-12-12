@@ -300,7 +300,7 @@ hardware_interface::return_type RobotiqSocketHardwareInterface::read(const rclcp
     reactivate_gripper_async_response_.store(std::nullopt);
   }
 
-  RCLCPP_INFO(LOGGER, "Gripper position: %.3f m, velocity: %.3f m/s", gripper_position_, gripper_velocity_);
+  RCLCPP_DEBUG(LOGGER, "Gripper position: %.3f m, velocity: %.3f m/s", gripper_position_, gripper_velocity_);
 
 
   return hardware_interface::return_type::OK;
