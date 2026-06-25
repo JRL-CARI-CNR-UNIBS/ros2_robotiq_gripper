@@ -252,13 +252,16 @@
             <limit lower="0.0" upper="0.8" velocity="0.5" effort="50" />
         </joint>
 
+        
         <joint name="${prefix}robotiq_85_right_knuckle_joint" type="revolute">
             <parent link="${prefix}robotiq_85_base_link" />
             <child link="${prefix}robotiq_85_right_knuckle_link" />
             <axis xyz="0 -1 0" />
             <origin xyz="-0.03060114 0.0 0.05490452" rpy="0 0 0" />
             <limit lower="-0.8" upper="0.0" velocity="0.5" effort="50" />
+            <xacro:unless value="${use_fake_hardware}">
             <mimic joint="${prefix}robotiq_85_left_knuckle_joint" multiplier="-1" />
+            </xacro:unless>
         </joint>
 
         <joint name="${prefix}robotiq_85_left_finger_joint" type="fixed">
@@ -278,7 +281,9 @@
             <child link="${prefix}robotiq_85_left_inner_knuckle_link" />
             <axis xyz="0 -1 0" />
             <origin xyz="0.0127 0.0 0.06142" rpy="0 0 0" />
+            <xacro:unless value="${use_fake_hardware}">
             <mimic joint="${prefix}robotiq_85_left_knuckle_joint" />
+            </xacro:unless>
         </joint>
 
         <joint name="${prefix}robotiq_85_right_inner_knuckle_joint" type="continuous">
@@ -286,7 +291,10 @@
             <child link="${prefix}robotiq_85_right_inner_knuckle_link" />
             <axis xyz="0 -1 0" />
             <origin xyz="-0.0127 0.0 0.06142" rpy="0 0 0" />
+            <xacro:unless value="${use_fake_hardware}">
             <mimic joint="${prefix}robotiq_85_left_knuckle_joint" multiplier="-1" />
+            </xacro:unless>
+
         </joint>
 
         <joint name="${prefix}robotiq_85_left_finger_tip_joint" type="continuous">
@@ -294,7 +302,9 @@
             <child link="${prefix}robotiq_85_left_finger_tip_link" />
             <axis xyz="0 -1 0" />
             <origin xyz="0.00563134 0.0 0.04718515" rpy="0 0 0" />
+            <xacro:unless value="${use_fake_hardware}">
             <mimic joint="${prefix}robotiq_85_left_knuckle_joint" multiplier="-1" />
+            </xacro:unless>
         </joint>
 
         <joint name="${prefix}robotiq_85_right_finger_tip_joint" type="continuous">
@@ -302,7 +312,9 @@
             <child link="${prefix}robotiq_85_right_finger_tip_link" />
             <axis xyz="0 -1 0" />
             <origin xyz="-0.00563134 0.0 0.04718515" rpy="0 0 0" />
+            <xacro:unless value="${use_fake_hardware}">
             <mimic joint="${prefix}robotiq_85_left_knuckle_joint" />
+            </xacro:unless>
         </joint>
     </xacro:macro>
 </robot>
